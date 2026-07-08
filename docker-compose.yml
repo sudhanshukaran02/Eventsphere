@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: eventsphere_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./backend
+    container_name: eventsphere_api
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongo:27017/eventsphere
+      - JWT_SECRET=production_secret_key_change_me
+      - JWT_EXPIRE=7d
+      - USE_MOCK_SMTP=true
+      - USE_MOCK_CLOUDINARY=true
+      - USE_MOCK_RAZORPAY=true
+    depends_on:
+      - mongo
+
+  frontend:
+    build: ./frontend
+    container_name: eventsphere_web
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
