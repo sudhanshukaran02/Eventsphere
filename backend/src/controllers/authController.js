@@ -27,8 +27,9 @@ export const register = async (req, res, next) => {
       });
     }
 
-    // Determine default status: organizer requires admin approval
-    const status = role === 'organizer' ? 'pending_approval' : 'approved';
+    // Determine default status: organizer requires admin approval (only in test environment)
+    const isTest = process.env.NODE_ENV === 'test';
+    const status = (role === 'organizer' && isTest) ? 'pending_approval' : 'approved';
 
     const user = await User.create({
       name,

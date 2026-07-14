@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import seedDB from '../utils/seeder.js';
 
 let mongoServer;
 
@@ -9,6 +10,7 @@ const connectDB = async () => {
       serverSelectionTimeoutMS: 2000,
     });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
+    await seedDB();
   } catch (error) {
     console.error(`MongoDB Connection Error: ${error.message}`);
     
@@ -24,6 +26,7 @@ const connectDB = async () => {
         
         const conn = await mongoose.connect(mongoUri);
         console.log(`Connected to fallback in-memory MongoDB: ${conn.connection.host}`);
+        await seedDB();
       } catch (fallbackError) {
         console.error(`Failed to start in-memory MongoDB: ${fallbackError.message}`);
         console.log('WARNING: Express server is running, but database connection failed.');

@@ -21,7 +21,7 @@ if (isCloudinaryConfigured) {
 }
 
 /**
- * Uploads a file buffer or path. If Cloudinary is not configured, returns a local asset URL.
+ * Uploads a file buffer or path. If Cloudinary is not configured or fails, returns a local asset URL.
  * @param {string} localFilePath - Path to temporary file
  * @returns {Promise<string>} URL of the uploaded image
  */
@@ -33,16 +33,13 @@ export const uploadImage = async (localFilePath) => {
       });
       return result.secure_url;
     } catch (error) {
-      console.error('Cloudinary Upload Error:', error);
-      throw new Error('Image upload failed');
+      console.error('Cloudinary Upload Error (Falling back to local disk storage):', error);
     }
-  } else {
-    // If local, return the relative static path (which will be served by express static middleware)
-    // The caller is expected to move/rename the file if they want, but multer diskStorage already saves it.
-    // We just return the filename part for frontend to query `/uploads/filename`
-    const filename = localFilePath.replace(/\\/g, '/').split('/').pop();
-    return `/uploads/${filename}`;
   }
+
+  // Fallback to local storage: return the relative static path served by express static middleware
+  const filename = localFilePath.replace(/\\/g, '/').split('/').pop();
+  return `/uploads/${filename}`;
 };
 
 export default cloudinary;

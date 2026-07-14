@@ -150,3 +150,7 @@ const server = app.listen(PORT, () => {
 process.on('unhandledRejection', (err, promise) => {
   console.error(`Unhandled Rejection Error: ${err.message}`);
 });
+
+// Force nodemon restart 2
+
+

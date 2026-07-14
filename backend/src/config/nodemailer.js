@@ -40,12 +40,17 @@ if (isSMTPConfigured) {
 
   transporter = {
     sendMail: async (mailOptions) => {
+      const attachmentsSummary = mailOptions.attachments 
+        ? mailOptions.attachments.map(att => `${att.filename} (${att.cid ? `cid:${att.cid}` : 'no cid'})`).join(', ')
+        : 'None';
+
       const emailContent = `
 ========================================
 EMAIL SENT AT: ${new Date().toISOString()}
 FROM: ${mailOptions.from || process.env.SMTP_FROM || 'noreply@eventsphere.com'}
 TO: ${mailOptions.to}
 SUBJECT: ${mailOptions.subject}
+ATTACHMENTS: ${attachmentsSummary}
 ----------------------------------------
 HTML CONTENT:
 ${mailOptions.html}
@@ -69,10 +74,45 @@ ${mailOptions.text || 'No plain text provided'}
 
 /**
  * Send an email using the active transporter
- * @param {object} options - { to, subject, html, text }
+ * @param {object} options - { to, subject, html, text, attachments }
  */
-export const sendEmail = async ({ to, subject, html, text }) => {
+export const sendEmail = async ({ to, subject, html, text, attachments }) => {
   try {
+    // Intercept mock email addresses to prevent bouncing on SMTP
+    const isMockDomain = /@(test\.com|example\.com|dummy\.com|temp\.com|mock\.com|invalid\.com)$/i.test(to);
+    
+    if (isMockDomain) {
+      const logsDir = path.join(__dirname, '..', '..', 'logs');
+      if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true });
+      }
+      const attachmentsSummary = attachments 
+        ? attachments.map(att => `${att.filename} (${att.cid ? `cid:${att.cid}` : 'no cid'})`).join(', ')
+        : 'None';
+
+      const emailContent = `
+========================================
+EMAIL SENT AT: ${new Date().toISOString()} (MOCK BYPASS FOR DOMAIN)
+FROM: "EventSphere" <noreply@eventsphere.com>
+TO: ${to}
+SUBJECT: ${subject}
+ATTACHMENTS: ${attachmentsSummary}
+----------------------------------------
+HTML CONTENT:
+${html}
+----------------------------------------
+TEXT CONTENT:
+${text || 'No plain text provided'}
+========================================
+`;
+      fs.appendFileSync(path.join(logsDir, 'emails.txt'), emailContent);
+      console.log(`[MOCK BYPASS] Blocked sending real email to mock address: ${to}. Logged in backend/logs/emails.txt`);
+      return {
+        messageId: `mock_bypass_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+        response: '250 OK (Mock bypass logged)',
+      };
+    }
+
     const fromAddress = process.env.SMTP_FROM || 'noreply@eventsphere.com';
     const info = await transporter.sendMail({
       from: `"EventSphere" <${fromAddress}>`,
@@ -80,6 +120,7 @@ export const sendEmail = async ({ to, subject, html, text }) => {
       subject,
       text,
       html,
+      attachments,
     });
     return info;
   } catch (error) {

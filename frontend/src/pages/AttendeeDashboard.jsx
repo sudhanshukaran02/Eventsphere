@@ -53,9 +53,14 @@ const AttendeeDashboard = () => {
     setLoading(true);
     try {
       const bookingsRes = await axios.get('/bookings/my-bookings');
+      let backendBookings = [];
       if (bookingsRes.data.success) {
-        setBookings(bookingsRes.data.bookings);
+        backendBookings = bookingsRes.data.bookings;
       }
+      
+      // Load local demo bookings
+      const localDemoBookings = JSON.parse(localStorage.getItem('demoBookings') || '[]');
+      setBookings([...localDemoBookings, ...backendBookings]);
       
       const savedRes = await axios.get('/events/saved');
       if (savedRes.data.success) {
@@ -91,6 +96,19 @@ const AttendeeDashboard = () => {
 
   const handleRefundRequest = async (bookingId) => {
     if (!window.confirm('Request Refund: Are you sure you want to request a refund for this ticket? This will cancel your ticket registration.')) {
+      return;
+    }
+    if (String(bookingId).startsWith('mock_booking_')) {
+      const updatedBookings = bookings.map(b => 
+        b._id === bookingId ? { ...b, refundStatus: 'requested' } : b
+      );
+      setBookings(updatedBookings);
+      const localDemoBookings = JSON.parse(localStorage.getItem('demoBookings') || '[]');
+      const updatedLocal = localDemoBookings.map(b => 
+        b._id === bookingId ? { ...b, refundStatus: 'requested' } : b
+      );
+      localStorage.setItem('demoBookings', JSON.stringify(updatedLocal));
+      alert('Refund request submitted successfully (Simulated for demo).');
       return;
     }
     try {

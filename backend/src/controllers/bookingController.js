@@ -154,6 +154,12 @@ export const createBooking = async (req, res, next) => {
             </table>
           </div>
 
+          <div style="text-align: center; margin: 25px 0; background-color: #f8fafc; padding: 20px; border-radius: 12px; border: 1px dashed #cbd5e1;">
+            <p style="margin: 0 0 12px 0; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Your Entry Pass QR Code</p>
+            <img src="cid:ticketqr" alt="Ticket QR Code" style="width: 200px; height: 200px; display: block; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px;" />
+            <p style="margin: 12px 0 0 0; font-size: 10px; font-family: monospace; color: #94a3b8;">Show this QR code at the entrance for scanning.</p>
+          </div>
+
           <p style="font-size: 13px; line-height: 1.5; color: #64748b; text-align: center;">
             Show the QR pass available in your Attendee Console dashboard at the entrance for scanning.
           </p>
@@ -168,6 +174,13 @@ export const createBooking = async (req, res, next) => {
         subject: `Ticket Confirmed - ${event.title}`,
         html: emailContent,
         text: `Your ticket for "${event.title}" is confirmed. Tickets: ${qty}. Location: ${event.location}`,
+        attachments: [
+          {
+            filename: 'ticket-qr.png',
+            path: qrCode,
+            cid: 'ticketqr'
+          }
+        ]
       });
 
       await createNotification({
@@ -351,6 +364,12 @@ export const verifyPayment = async (req, res, next) => {
           </table>
         </div>
 
+        <div style="text-align: center; margin: 25px 0; background-color: #f8fafc; padding: 20px; border-radius: 12px; border: 1px dashed #cbd5e1;">
+          <p style="margin: 0 0 12px 0; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Your Entry Pass QR Code</p>
+          <img src="cid:ticketqr" alt="Ticket QR Code" style="width: 200px; height: 200px; display: block; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px;" />
+          <p style="margin: 12px 0 0 0; font-size: 10px; font-family: monospace; color: #94a3b8;">Show this QR code at the entrance for scanning.</p>
+        </div>
+
         <p style="font-size: 13px; line-height: 1.5; color: #64748b; text-align: center;">
           A digital ticket stub with a printable invoice is available inside your Attendee Console.
         </p>
@@ -365,6 +384,13 @@ export const verifyPayment = async (req, res, next) => {
       subject: `Ticket Confirmed & Paid - ${event ? event.title : 'EventSphere'}`,
       html: emailContent,
       text: `Your ticket for "${event ? event.title : 'Event'}" is confirmed. Quantity: ${booking.ticketQuantity}. Paid: ₹${booking.totalPrice}`,
+      attachments: [
+        {
+          filename: 'ticket-qr.png',
+          path: qrCode,
+          cid: 'ticketqr'
+        }
+      ]
     });
 
     await createNotification({

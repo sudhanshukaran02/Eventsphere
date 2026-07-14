@@ -111,6 +111,7 @@ const EventDetails = () => {
     setDiscountAmount(0);
     setCouponSuccess('');
     setCouponError('');
+    setError('');
   }, [qty]);
 
   useEffect(() => {
@@ -202,6 +203,26 @@ const EventDetails = () => {
 
     setIsSubmittingReview(true);
     try {
+      if (event._id.startsWith('demo-event-')) {
+        const newReview = {
+          _id: `mock_review_${Date.now()}`,
+          eventId: event._id,
+          rating: myRating,
+          reviewText: myReviewText,
+          userId: {
+            _id: user?._id || 'mock_user_id',
+            name: user?.name || 'Local Tester',
+          },
+          createdAt: new Date().toISOString(),
+        };
+        setReviews([newReview, ...reviews]);
+        setReviewsCount(reviewsCount + 1);
+        setAverageRating(Math.round(((averageRating * reviewsCount + myRating) / (reviewsCount + 1)) * 10) / 10);
+        alert('Thank you! Review published successfully (Simulated for demo).');
+        setMyReviewText('');
+        setIsSubmittingReview(false);
+        return;
+      }
       const { data } = await axios.post(`/events/${event._id}/reviews`, {
         rating: myRating,
         reviewText: myReviewText,
@@ -222,6 +243,10 @@ const EventDetails = () => {
   const handleSaveToggle = async () => {
     if (!isAuthenticated) {
       navigate('/login');
+      return;
+    }
+    if (event._id.startsWith('demo-event-')) {
+      setIsSaved(!isSaved);
       return;
     }
     try {
@@ -281,21 +306,66 @@ const EventDetails = () => {
     setError('');
 
     try {
-      const configRes = await axios.get('/payments/config');
-      const config = configRes.data;
-      setPaymentConfig(config);
+      let data;
+      let config = { useMock: true, keyId: 'mock_key' };
 
-      const { data } = await axios.post('/bookings', {
-        eventId: event._id,
-        ticketQuantity: qty,
-        couponCode: appliedCoupon || undefined,
-      });
+      if (event._id.startsWith('demo-event-')) {
+        const isFree = event.price === 0;
+        const totalPrice = isFree ? 0 : (event.price * qty) - discountAmount;
+        const mockBookingId = `mock_booking_${Date.now()}`;
+        const mockQrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+          JSON.stringify({
+            bookingId: mockBookingId,
+            attendeeName: user?.name || 'Local Tester',
+            eventName: event.title,
+            ticketQuantity: qty,
+            bookingDate: new Date().toISOString(),
+          })
+        )}`;
+
+        data = {
+          success: true,
+          isFree,
+          booking: {
+            _id: mockBookingId,
+            eventId: event,
+            userId: {
+              _id: user?._id || 'mock_user_id',
+              name: user?.name || 'Local Tester',
+              email: user?.email || 'test_attendee_random@example.com',
+            },
+            ticketQuantity: qty,
+            totalPrice,
+            paymentStatus: isFree ? 'paid' : 'pending',
+            paymentId: `order_mock_${Math.random().toString(36).substring(5)}`,
+            bookingDate: new Date().toISOString(),
+            qrCodeUrl: mockQrCodeUrl,
+          }
+        };
+      } else {
+        const configRes = await axios.get('/payments/config');
+        config = configRes.data;
+        setPaymentConfig(config);
+
+        const response = await axios.post('/bookings', {
+          eventId: event._id,
+          ticketQuantity: qty,
+          couponCode: appliedCoupon || undefined,
+        });
+        data = response.data;
+      }
 
       if (data.success) {
         if (data.isFree) {
           setBookedDetails(data.booking);
           setBookingSuccess(true);
           setIsBooking(false);
+          
+          if (event._id.startsWith('demo-event-')) {
+            const existing = JSON.parse(localStorage.getItem('demoBookings') || '[]');
+            existing.push(data.booking);
+            localStorage.setItem('demoBookings', JSON.stringify(existing));
+          }
         } else {
           setPendingBooking(data.booking);
           if (config.useMock) {
@@ -377,14 +447,34 @@ const EventDetails = () => {
         const mockPaymentId = `pay_mock_${Math.random().toString(36).substring(5)}`;
         const mockSignature = `mock_sig_for_${orderId}`;
 
-        const verifyRes = await axios.post('/bookings/verify', {
-          razorpay_order_id: orderId,
-          razorpay_payment_id: mockPaymentId,
-          razorpay_signature: mockSignature,
-        });
+        let verifyData;
+        const isDemoEvent = typeof pendingBooking.eventId === 'object' 
+          ? pendingBooking.eventId._id.startsWith('demo-event-') 
+          : pendingBooking.eventId.startsWith('demo-event-');
 
-        if (verifyRes.data.success) {
-          setBookedDetails(verifyRes.data.booking);
+        if (isDemoEvent) {
+          verifyData = {
+            success: true,
+            booking: {
+              ...pendingBooking,
+              paymentStatus: 'paid',
+            }
+          };
+          
+          const existing = JSON.parse(localStorage.getItem('demoBookings') || '[]');
+          existing.push(verifyData.booking);
+          localStorage.setItem('demoBookings', JSON.stringify(existing));
+        } else {
+          const verifyRes = await axios.post('/bookings/verify', {
+            razorpay_order_id: orderId,
+            razorpay_payment_id: mockPaymentId,
+            razorpay_signature: mockSignature,
+          });
+          verifyData = verifyRes.data;
+        }
+
+        if (verifyData.success) {
+          setBookedDetails(verifyData.booking);
           setBookingSuccess(true);
         }
       } else {
@@ -1145,6 +1235,13 @@ const EventDetails = () => {
                     </>
                   )}
                 </motion.button>
+              )}
+
+              {error && (
+                <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] uppercase tracking-wider font-bold rounded-xl flex items-start gap-2 leading-relaxed">
+                  <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5" />
+                  <p>{error}</p>
+                </div>
               )}
 
             </div>

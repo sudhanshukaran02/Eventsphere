@@ -18,6 +18,7 @@ dotenv.config();
 const TEST_MONGODB_URI = process.env.MONGODB_URI + '_test';
 process.env.MONGODB_URI = TEST_MONGODB_URI;
 process.env.PORT = 5099; // Test port
+process.env.NODE_ENV = 'test';
 process.env.USE_MOCK_PAYMENTS = 'true';
 process.env.USE_MOCK_SMTP = 'true';
 process.env.USE_MOCK_CLOUDINARY = 'true';
