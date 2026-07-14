@@ -71,7 +71,9 @@ const CreateEvent = () => {
               normalized = '/' + normalized;
             }
             if (normalized.startsWith('/uploads')) {
-              setBannerPreview(`http://localhost:5000${normalized}`);
+              const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+              const backendUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
+              setBannerPreview(`${backendUrl}${normalized}`);
             } else {
               setBannerPreview(ev.bannerUrl);
             }

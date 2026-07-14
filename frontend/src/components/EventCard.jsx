@@ -31,7 +31,9 @@ const EventCard = ({ event, onSaveToggle, variant = 'default' }) => {
       normalized = '/' + normalized;
     }
     if (normalized.startsWith('/uploads')) {
-      return `http://localhost:5000${normalized}`;
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const backendUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
+      return `${backendUrl}${normalized}`;
     }
     return url;
   };
