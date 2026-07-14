@@ -2,7 +2,13 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 
 // Configure Axios Defaults
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+let configuredApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Ensure the API url ends with /api
+if (configuredApiUrl && !configuredApiUrl.endsWith('/api') && !configuredApiUrl.endsWith('/api/')) {
+  configuredApiUrl = configuredApiUrl.replace(/\/$/, '') + '/api';
+}
+
+export const API_URL = configuredApiUrl;
 export const BACKEND_URL = API_URL.replace(/\/api\/?$/, '');
 
 axios.defaults.baseURL = API_URL;
