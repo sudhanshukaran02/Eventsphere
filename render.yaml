@@ -43,12 +43,13 @@ services:
         value: noreply@eventsphere.com
 
   # Frontend React App
-  - type: static
+  - type: web
     name: eventsphere-frontend
+    runtime: static
     plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
-    publishDir: dist
+    staticPublishPath: dist
 
     routes:
       - type: rewrite
