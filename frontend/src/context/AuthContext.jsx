@@ -112,9 +112,10 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Google login axios error:', error);
+      const reqUrl = error.config ? `${error.config.baseURL || axios.defaults.baseURL || ''}${error.config.url}` : 'unknown';
       return {
         success: false,
-        message: error.response?.data?.message || `Google authentication failed: ${error.message}`,
+        message: error.response?.data?.message || `Google authentication failed: ${error.message} (Target URL: ${reqUrl})`,
       };
     } finally {
       setLoading(false);
