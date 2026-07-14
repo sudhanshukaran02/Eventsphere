@@ -112,6 +112,14 @@ const Login = () => {
   const handleSocialLogin = (platform) => {
     if (platform === 'Google') {
       if (typeof google !== 'undefined') {
+        try {
+          google.accounts.id.initialize({
+            client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-client-id.apps.googleusercontent.com',
+            callback: handleGoogleResponse,
+          });
+        } catch (e) {
+          console.log('Google accounts initialization:', e);
+        }
         google.accounts.id.prompt();
       } else {
         setError('Google Sign-In SDK is not loaded yet. Please try again in a moment.');

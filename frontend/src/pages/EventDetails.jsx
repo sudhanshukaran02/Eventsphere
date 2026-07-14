@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, BACKEND_URL } from '../context/AuthContext';
 import { demoEvents } from '../utils/demoEvents';
 import EventCard from '../components/EventCard';
-import { 
-  Calendar, 
-  MapPin, 
-  Ticket, 
-  ShieldAlert, 
-  Loader2, 
-  ArrowLeft, 
-  Heart, 
-  User, 
-  CheckCircle2, 
-  Star, 
-  Clock, 
+import {
+  Calendar,
+  MapPin,
+  Ticket,
+  ShieldAlert,
+  Loader2,
+  ArrowLeft,
+  Heart,
+  User,
+  CheckCircle2,
+  Star,
+  Clock,
   Info,
   Copy,
   Check,
@@ -68,7 +68,7 @@ const EventDetails = () => {
   const [relatedEvents, setRelatedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   // Booking Form States
   const [qty, setQty] = useState(1);
   const [isBooking, setIsBooking] = useState(false);
@@ -143,7 +143,7 @@ const EventDetails = () => {
       if (data.success) {
         setEvent(data.event);
         await fetchReviewsAndBooking(data.event._id);
-        
+
         try {
           const relRes = await axios.get('/events', { params: { category: data.event.category } });
           if (relRes.data.success) {
@@ -186,7 +186,7 @@ const EventDetails = () => {
       try {
         const { data } = await axios.get('/bookings/my-bookings');
         if (data.success) {
-          const hasBooking = data.bookings.some(b => 
+          const hasBooking = data.bookings.some(b =>
             (b.eventId?._id === eventId || b.eventId === eventId) && b.paymentStatus === 'paid'
           );
           setUserHasBooked(hasBooking);
@@ -360,7 +360,7 @@ const EventDetails = () => {
           setBookedDetails(data.booking);
           setBookingSuccess(true);
           setIsBooking(false);
-          
+
           if (event._id.startsWith('demo-event-')) {
             const existing = JSON.parse(localStorage.getItem('demoBookings') || '[]');
             existing.push(data.booking);
@@ -434,7 +434,7 @@ const EventDetails = () => {
 
   const handleMockPaymentResult = async (status) => {
     setShowMockModal(false);
-    
+
     if (status === 'cancel') {
       setError('Payment cancelled by user.');
       return;
@@ -448,8 +448,8 @@ const EventDetails = () => {
         const mockSignature = `mock_sig_for_${orderId}`;
 
         let verifyData;
-        const isDemoEvent = typeof pendingBooking.eventId === 'object' 
-          ? pendingBooking.eventId._id.startsWith('demo-event-') 
+        const isDemoEvent = typeof pendingBooking.eventId === 'object'
+          ? pendingBooking.eventId._id.startsWith('demo-event-')
           : pendingBooking.eventId.startsWith('demo-event-');
 
         if (isDemoEvent) {
@@ -460,7 +460,7 @@ const EventDetails = () => {
               paymentStatus: 'paid',
             }
           };
-          
+
           const existing = JSON.parse(localStorage.getItem('demoBookings') || '[]');
           existing.push(verifyData.booking);
           localStorage.setItem('demoBookings', JSON.stringify(existing));
@@ -496,7 +496,7 @@ const EventDetails = () => {
     const subtotal = event.price * bookedDetails.ticketQuantity;
     const gst = Math.round(subtotal * 0.18);
     const total = bookedDetails.totalPrice;
-    
+
     printWindow.document.write(`
       <html>
       <head>
@@ -617,9 +617,7 @@ const EventDetails = () => {
       normalized = '/' + normalized;
     }
     if (normalized.startsWith('/uploads')) {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const backendUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
-      return `${backendUrl}${normalized}`;
+      return `${BACKEND_URL}${normalized}`;
     }
     return url;
   };
@@ -655,7 +653,7 @@ const EventDetails = () => {
     const gst = Math.round(subtotal * 0.18);
     return (
       <div className="min-h-screen py-16 px-4 flex flex-col items-center justify-center bg-es-void font-body">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="glass-card max-w-lg w-full p-8 rounded-3xl text-center space-y-6 bg-es-surface border border-white/[0.08] shadow-2xl"
@@ -663,7 +661,7 @@ const EventDetails = () => {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">
             <CheckCircle2 className="h-8 w-8" />
           </div>
-          
+
           <div className="space-y-1 text-center">
             <h2 className="text-2xl font-bold font-display uppercase tracking-wider text-white">Passes Confirmed!</h2>
             <p className="text-xs text-text-secondary">
@@ -677,7 +675,7 @@ const EventDetails = () => {
               <span className="text-[9px] font-bold text-brand uppercase tracking-widest leading-none font-mono">Tax Invoice & Receipt</span>
               <span className="text-[9px] font-mono text-text-tertiary">ID: {bookedDetails._id.substring(0, 12)}</span>
             </div>
-            
+
             <div className="text-xs space-y-2 text-text-secondary">
               <div className="flex justify-between">
                 <span>Attendee Name:</span>
@@ -725,7 +723,7 @@ const EventDetails = () => {
   if (bookingFailed) {
     return (
       <div className="min-h-screen py-16 px-4 flex flex-col items-center justify-center bg-es-void font-body">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="glass-card max-w-md w-full p-8 rounded-3xl text-center space-y-6 bg-es-surface border border-white/[0.08] shadow-2xl"
@@ -733,7 +731,7 @@ const EventDetails = () => {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-danger/10 text-danger animate-bounce">
             <X className="h-8 w-8" />
           </div>
-          
+
           <div className="space-y-1 text-center">
             <h2 className="text-2xl font-bold font-display uppercase tracking-wider text-white font-semibold">Transaction Failed</h2>
             <p className="text-xs text-text-secondary">
@@ -774,7 +772,7 @@ const EventDetails = () => {
 
   const isSoldOut = event.availableTickets <= 0;
   const daysDiff = Math.ceil((new Date(event.startDate) - new Date()) / (1000 * 60 * 60 * 24));
-  
+
   const ratingVal = event.rating || (4.5 + (event.title.charCodeAt(0) % 5) / 10).toFixed(1);
   const reviewsVal = event.reviewsCount || (event.title.charCodeAt(1) % 150) + 12;
 
@@ -797,41 +795,41 @@ const EventDetails = () => {
       {/* 1. Large Hero Banner Section */}
       <section className="relative overflow-hidden pt-12 pb-24 px-4 md:px-8 bg-es-surface text-white">
         <div className="absolute inset-0 z-0 opacity-40">
-          <img 
-            src={getImageUrl(event.bannerUrl)} 
-            alt="Blur bg" 
-            className="w-full h-full object-cover blur-2xl scale-110" 
+          <img
+            src={getImageUrl(event.bannerUrl)}
+            alt="Blur bg"
+            className="w-full h-full object-cover blur-2xl scale-110"
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-es-void via-es-void/70 to-es-void/50 z-0"></div>
 
         <div className="relative z-10 max-w-7xl mx-auto space-y-6 pt-10">
           <div className="flex justify-between items-center">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="p-2 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/10 backdrop-blur-md transition-all inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider"
             >
               <ArrowLeft className="h-4 w-4" /> Back to Events
             </Link>
 
             <div className="flex items-center gap-1.5">
-              <button 
+              <button
                 onClick={() => window.open(`https://twitter.com/intent/tweet?url=${window.location.href}`, '_blank')}
                 className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/10 backdrop-blur-md transition-colors cursor-pointer"
                 title="Share on Twitter"
               >
                 <Twitter className="h-4 w-4" />
               </button>
-              <button 
+              <button
                 onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${window.location.href}`, '_blank')}
                 className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/10 backdrop-blur-md transition-colors cursor-pointer"
                 title="Share on LinkedIn"
               >
                 <Linkedin className="h-4 w-4" />
               </button>
-              
+
               <div className="relative">
-                <button 
+                <button
                   onClick={handleCopyLink}
                   className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/10 backdrop-blur-md transition-colors cursor-pointer"
                   title="Copy link to clipboard"
@@ -840,7 +838,7 @@ const EventDetails = () => {
                 </button>
                 <AnimatePresence>
                   {linkCopied && (
-                    <motion.span 
+                    <motion.span
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
@@ -861,7 +859,7 @@ const EventDetails = () => {
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-none text-white font-display uppercase">
               {event.title}
             </h1>
-            
+
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-secondary pt-2 font-medium">
               <span className="flex items-center gap-1.5"><User className="h-4 w-4 text-brand" /> Hosted by {event.organizerId?.name || 'Community Organizer'}</span>
               <span className="h-1.5 w-1.5 rounded-full bg-white/10" />
@@ -874,16 +872,16 @@ const EventDetails = () => {
       {/* 2. Page Content Layout */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
           {/* LEFT COLUMN: Main details segments */}
           <div className="lg:col-span-2 space-y-8">
-          
+
             {/* Banner Media Card */}
             <div className="rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl aspect-video w-full bg-es-surface">
-              <img 
-                src={getImageUrl(event.bannerUrl)} 
-                alt={event.title} 
-                className="w-full h-full object-cover" 
+              <img
+                src={getImageUrl(event.bannerUrl)}
+                alt={event.title}
+                className="w-full h-full object-cover"
               />
             </div>
 
@@ -939,7 +937,7 @@ const EventDetails = () => {
             {/* Agenda/Schedule Section */}
             <div className="bg-es-surface border border-white/[0.06] p-6 md:p-8 rounded-2xl shadow-xl space-y-6">
               <h2 className="text-base font-bold text-white uppercase tracking-widest font-display">Agenda & Timeline</h2>
-              
+
               <div className="relative border-l border-white/5 pl-6 ml-3 space-y-6 py-2">
                 {agendaList.map((item, idx) => (
                   <div key={idx} className="relative">
@@ -962,29 +960,29 @@ const EventDetails = () => {
                 <h2 className="text-base font-bold text-white uppercase tracking-widest font-display">Venue Information</h2>
                 <span className="text-[9px] text-text-tertiary font-bold uppercase flex items-center gap-1"><Map className="h-3.5 w-3.5" /> Map Location</span>
               </div>
-              
+
               <p className="text-xs text-text-secondary leading-relaxed font-light">
                 The experience takes place at <strong className="font-semibold text-white">{event.location}</strong>. For physical locations, doors open 30 minutes before slot schedules.
               </p>
 
               <div className="relative h-64 rounded-xl overflow-hidden bg-es-void border border-white/5 shadow-inner group">
-                <img 
-                  src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800" 
-                  alt="Mock Map grid" 
-                  className="w-full h-full object-cover opacity-30 group-hover:scale-102 transition-transform duration-700" 
+                <img
+                  src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800"
+                  alt="Mock Map grid"
+                  className="w-full h-full object-cover opacity-30 group-hover:scale-102 transition-transform duration-700"
                 />
-                
+
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
                   <div className="p-3 rounded-full bg-brand/20 border border-brand/35 text-brand animate-bounce mb-3 shadow-lg">
                     <MapPin className="h-7 w-7" />
                   </div>
-                  
+
                   <div className="bg-es-surface border border-white/10 p-3 rounded-xl max-w-xs shadow-xl text-white space-y-1">
                     <p className="text-xs font-bold leading-tight truncate">{event.location}</p>
-                    <a 
-                      href={`https://maps.google.com/?q=${encodeURIComponent(event.location)}`} 
-                      target="_blank" 
-                      rel="noreferrer" 
+                    <a
+                      href={`https://maps.google.com/?q=${encodeURIComponent(event.location)}`}
+                      target="_blank"
+                      rel="noreferrer"
                       className="text-[9px] font-bold text-brand hover:underline uppercase block tracking-wider"
                     >
                       Open in Google Maps
@@ -1023,7 +1021,7 @@ const EventDetails = () => {
               {userHasBooked && !reviews.some(r => r.userId?._id === user?.id || r.userId === user?.id) && (
                 <form onSubmit={handleSubmitReview} className="p-4 rounded-xl bg-es-void/40 border border-white/5 space-y-4">
                   <h3 className="text-xs font-bold text-white uppercase tracking-wider">Leave a Review</h3>
-                  
+
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-bold text-text-tertiary uppercase">Rating:</span>
                     <div className="flex gap-1">
@@ -1062,7 +1060,7 @@ const EventDetails = () => {
                   </div>
                 </form>
               )}
-              
+
               <div className="divide-y divide-white/5 space-y-4">
                 {reviews.length === 0 ? (
                   <div className="py-6 text-center text-xs text-text-secondary font-light">
@@ -1094,7 +1092,7 @@ const EventDetails = () => {
           {/* RIGHT COLUMN: Sticky Ticket console */}
           <div className="space-y-6 text-xs">
             <div className="bg-es-surface border border-white/[0.06] p-6 rounded-2xl shadow-2xl sticky top-24 space-y-6">
-            
+
               {/* Cost Header */}
               <div className="pb-4 border-b border-white/5 flex justify-between items-center">
                 <div>
@@ -1110,7 +1108,7 @@ const EventDetails = () => {
                     )}
                   </p>
                 </div>
-                
+
                 {/* Save Heart Toggle */}
                 {(!user || user.role === 'attendee') && (
                   <motion.button
@@ -1131,7 +1129,7 @@ const EventDetails = () => {
                     {isSoldOut ? 'Sold Out' : `${event.availableTickets} / ${event.totalTickets} slots left`}
                   </span>
                 </div>
-                
+
                 {daysDiff > 0 && (
                   <div className="flex justify-between items-center">
                     <span>Days to Event:</span>
@@ -1141,10 +1139,9 @@ const EventDetails = () => {
 
                 {/* Ticket slots ratio progress */}
                 <div className="h-1 w-full bg-es-void rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      isSoldOut ? 'bg-brand' : event.availableTickets <= 10 ? 'bg-signal' : 'bg-brand'
-                    }`}
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${isSoldOut ? 'bg-brand' : event.availableTickets <= 10 ? 'bg-signal' : 'bg-brand'
+                      }`}
                     style={{ width: `${Math.round(((event.totalTickets - event.availableTickets) / event.totalTickets) * 100)}%` }}
                   />
                 </div>
@@ -1202,7 +1199,7 @@ const EventDetails = () => {
                     )}
                   </div>
                 )}
-              </div> 
+              </div>
 
               {/* Action Button */}
               {user?.role === 'organizer' || user?.role === 'admin' ? (
@@ -1269,7 +1266,7 @@ const EventDetails = () => {
       {/* 4. SIMULATED MOCK PAYMENT MODAL OVERLAY */}
       {showMockModal && pendingBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="w-full max-w-sm overflow-hidden rounded-2xl bg-es-surface border border-white/[0.08] shadow-2xl text-white"

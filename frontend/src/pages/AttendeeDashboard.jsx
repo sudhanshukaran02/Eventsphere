@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, BACKEND_URL } from '../context/AuthContext';
 import EventCard from '../components/EventCard';
 import TicketQRModal from '../components/TicketQRModal';
 import { demoEvents } from '../utils/demoEvents';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Ticket, 
-  Bookmark, 
-  History, 
-  Calendar, 
-  MapPin, 
-  QrCode, 
-  User, 
-  ShieldCheck, 
+import {
+  Ticket,
+  Bookmark,
+  History,
+  Calendar,
+  MapPin,
+  QrCode,
+  User,
+  ShieldCheck,
   Mail,
   Camera,
   CheckCircle,
@@ -26,14 +26,14 @@ import axios from 'axios';
 
 const AttendeeDashboard = () => {
   const { user, refreshUser } = useAuth();
-  
+
   const [bookings, setBookings] = useState([]);
   const [savedEvents, setSavedEvents] = useState([]);
   const [recommendedEvents, setRecommendedEvents] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('tickets'); // 'tickets', 'saved', 'upcoming', 'notifications', 'profile'
-  
+
   // Profile settings local states
   const [profileName, setProfileName] = useState(user?.name || '');
   const [profileEmail, setProfileEmail] = useState(user?.email || '');
@@ -57,11 +57,11 @@ const AttendeeDashboard = () => {
       if (bookingsRes.data.success) {
         backendBookings = bookingsRes.data.bookings;
       }
-      
+
       // Load local demo bookings
       const localDemoBookings = JSON.parse(localStorage.getItem('demoBookings') || '[]');
       setBookings([...localDemoBookings, ...backendBookings]);
-      
+
       const savedRes = await axios.get('/events/saved');
       if (savedRes.data.success) {
         setSavedEvents(savedRes.data.events);
@@ -99,12 +99,12 @@ const AttendeeDashboard = () => {
       return;
     }
     if (String(bookingId).startsWith('mock_booking_')) {
-      const updatedBookings = bookings.map(b => 
+      const updatedBookings = bookings.map(b =>
         b._id === bookingId ? { ...b, refundStatus: 'requested' } : b
       );
       setBookings(updatedBookings);
       const localDemoBookings = JSON.parse(localStorage.getItem('demoBookings') || '[]');
-      const updatedLocal = localDemoBookings.map(b => 
+      const updatedLocal = localDemoBookings.map(b =>
         b._id === bookingId ? { ...b, refundStatus: 'requested' } : b
       );
       localStorage.setItem('demoBookings', JSON.stringify(updatedLocal));
@@ -220,9 +220,7 @@ const AttendeeDashboard = () => {
       normalized = '/' + normalized;
     }
     if (normalized.startsWith('/uploads')) {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const backendUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
-      return `${backendUrl}${normalized}`;
+      return `${BACKEND_URL}${normalized}`;
     }
     return url;
   };
@@ -262,7 +260,7 @@ const AttendeeDashboard = () => {
                   {user?.name.charAt(0)}
                 </div>
               )}
-              <div 
+              <div
                 onClick={() => setActiveTab('profile')}
                 className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity"
               >
@@ -278,7 +276,7 @@ const AttendeeDashboard = () => {
               <p className="text-xs text-text-secondary font-light">{user?.email}</p>
             </div>
           </div>
-          
+
           <div className="flex gap-4 text-center">
             <div className="bg-white/5 border border-white/10 px-5 py-3 rounded-xl backdrop-blur-md">
               <p className="text-2xl font-extrabold font-mono text-brand">{paidBookings.length}</p>
@@ -294,7 +292,7 @@ const AttendeeDashboard = () => {
 
       {/* 2. Main Console Panel */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
-        
+
         {/* Tab switch bar */}
         <div className="flex border-b border-white/5 gap-6 mb-8 overflow-x-auto scrollbar-none">
           {[
@@ -325,7 +323,7 @@ const AttendeeDashboard = () => {
 
         {/* Tab Content Rendering with animations */}
         <AnimatePresence mode="wait">
-          
+
           {/* TAB 1: My Tickets & Booking History */}
           {activeTab === 'tickets' && (
             <motion.div
@@ -337,7 +335,7 @@ const AttendeeDashboard = () => {
             >
               <div className="space-y-4">
                 <h2 className="text-xs font-bold text-text-tertiary uppercase tracking-widest block font-display">Active Passes</h2>
-                
+
                 {paidBookings.length === 0 ? (
                   <div className="text-center p-12 rounded-3xl bg-es-surface border border-white/5 shadow-2xl max-w-md mx-auto space-y-4">
                     <div className="mx-auto h-12 w-12 rounded-full bg-brand-muted text-brand flex items-center justify-center">
@@ -358,17 +356,17 @@ const AttendeeDashboard = () => {
                         >
                           {/* Left ticket thumbnail */}
                           <div className="w-1/3 aspect-square md:aspect-auto overflow-hidden bg-es-void shrink-0 relative hidden sm:block">
-                            <img 
-                              src={getImageUrl(event.bannerUrl)} 
-                              alt="Thumbnail" 
-                              className="h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500" 
+                            <img
+                              src={getImageUrl(event.bannerUrl)}
+                              alt="Thumbnail"
+                              className="h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
                             />
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent to-es-surface" />
                           </div>
 
                           {/* Ticket Stub Cutout dots */}
                           <div className="absolute top-1/2 -translate-y-1/2 left-[33%] -translate-x-1/2 h-6 w-6 rounded-full bg-es-void border border-white/5 z-15 hidden sm:block shadow-inner" />
-                          
+
                           {/* Body */}
                           <div className="flex-1 p-5 flex flex-col justify-between space-y-4 text-xs">
                             <div className="space-y-2">
@@ -450,9 +448,8 @@ const AttendeeDashboard = () => {
                             <td className="p-4 text-text-secondary font-semibold font-mono">{b.ticketQuantity}</td>
                             <td className="p-4 text-text-secondary font-semibold font-mono">₹{b.totalPrice}</td>
                             <td className="p-4">
-                              <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase text-[9px] tracking-wider font-mono ${
-                                b.paymentStatus === 'pending' ? 'bg-amber-500/10 text-amber-500' : 'bg-brand-muted text-brand'
-                              }`}>
+                              <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase text-[9px] tracking-wider font-mono ${b.paymentStatus === 'pending' ? 'bg-amber-500/10 text-amber-500' : 'bg-brand-muted text-brand'
+                                }`}>
                                 {b.paymentStatus}
                               </span>
                             </td>
@@ -486,10 +483,10 @@ const AttendeeDashboard = () => {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {savedEvents.map((event) => (
-                    <EventCard 
-                      key={event._id} 
-                      event={event} 
-                      onSaveToggle={handleSaveRemove} 
+                    <EventCard
+                      key={event._id}
+                      event={event}
+                      onSaveToggle={handleSaveRemove}
                     />
                   ))}
                 </div>
@@ -516,9 +513,9 @@ const AttendeeDashboard = () => {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {recommendedEvents.map((event) => (
-                    <EventCard 
-                      key={event._id} 
-                      event={event} 
+                    <EventCard
+                      key={event._id}
+                      event={event}
                     />
                   ))}
                 </div>
@@ -548,7 +545,7 @@ const AttendeeDashboard = () => {
                   <span className="text-[10px] text-text-tertiary font-bold uppercase tracking-widest font-mono">Alerts</span>
                 )}
               </div>
- 
+
               {notifications.length === 0 ? (
                 <div className="text-center p-12 rounded-3xl bg-es-surface border border-white/5 shadow-2xl max-w-sm mx-auto space-y-3">
                   <div className="mx-auto h-11 w-11 rounded-full bg-brand-muted text-brand flex items-center justify-center">
@@ -561,18 +558,16 @@ const AttendeeDashboard = () => {
                   {notifications.map((notif) => {
                     const Icon = getNotificationIcon(notif.type);
                     return (
-                      <div 
+                      <div
                         key={notif._id}
                         onClick={() => !notif.isRead && handleMarkNotificationRead(notif._id)}
-                        className={`p-4 rounded-xl bg-es-surface border shadow-2xl flex gap-4 hover:border-brand/20 transition-all group cursor-pointer ${
-                          notif.isRead ? 'border-white/[0.04] opacity-60' : 'border-brand/20 bg-brand-subtle'
-                        }`}
+                        className={`p-4 rounded-xl bg-es-surface border shadow-2xl flex gap-4 hover:border-brand/20 transition-all group cursor-pointer ${notif.isRead ? 'border-white/[0.04] opacity-60' : 'border-brand/20 bg-brand-subtle'
+                          }`}
                       >
-                        <div className={`p-2.5 rounded-xl shrink-0 h-10 w-10 flex items-center justify-center ${
-                          notif.type === 'success' ? 'bg-emerald-500/10 text-emerald-500' :
-                          notif.type === 'security' ? 'bg-amber-500/10 text-amber-500' :
-                          notif.type === 'alert' ? 'bg-red-500/10 text-red-500' : 'bg-brand-muted text-brand'
-                        }`}>
+                        <div className={`p-2.5 rounded-xl shrink-0 h-10 w-10 flex items-center justify-center ${notif.type === 'success' ? 'bg-emerald-500/10 text-emerald-500' :
+                            notif.type === 'security' ? 'bg-amber-500/10 text-amber-500' :
+                              notif.type === 'alert' ? 'bg-red-500/10 text-red-500' : 'bg-brand-muted text-brand'
+                          }`}>
                           <Icon className="h-5 w-5" />
                         </div>
                         <div className="space-y-1 text-xs flex-1">
@@ -679,7 +674,7 @@ const AttendeeDashboard = () => {
 
                 <AnimatePresence>
                   {updateSuccess && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}

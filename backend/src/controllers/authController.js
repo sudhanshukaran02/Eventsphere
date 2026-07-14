@@ -251,7 +251,7 @@ export const resetPassword = async (req, res, next) => {
 // @access  Public
 export const googleLogin = async (req, res, next) => {
   try {
-    const { email, name, googleId } = req.body;
+    const { email, name, googleId, role } = req.body;
 
     if (!email) {
       return res.status(400).json({
@@ -267,12 +267,15 @@ export const googleLogin = async (req, res, next) => {
       // Create user if not exists
       // Generate a random password since they login with Google
       const randomPassword = crypto.randomBytes(16).toString('hex');
+      const userRole = role || 'attendee';
+      const defaultStatus = userRole === 'organizer' ? 'pending_approval' : 'approved';
+      
       user = await User.create({
         name: name || 'Google User',
         email,
         password: randomPassword,
-        role: 'attendee',
-        status: 'approved',
+        role: userRole,
+        status: defaultStatus,
       });
     }
 

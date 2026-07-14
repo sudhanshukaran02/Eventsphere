@@ -2,7 +2,10 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 
 // Configure Axios Defaults
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export const BACKEND_URL = API_URL.replace(/\/api\/?$/, '');
+
+axios.defaults.baseURL = API_URL;
 
 // Intercept requests to add JWT token if exists
 axios.interceptors.request.use(
@@ -35,7 +38,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return;
     }
-    
+
     try {
       const { data } = await axios.get('/auth/me');
       if (data.success) {

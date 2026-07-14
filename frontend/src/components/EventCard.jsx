@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { 
-  Calendar, 
-  MapPin, 
-  Bookmark, 
-  BookmarkCheck, 
-  Star, 
-  ArrowUpRight, 
+import { useAuth, BACKEND_URL } from '../context/AuthContext';
+import {
+  Calendar,
+  MapPin,
+  Bookmark,
+  BookmarkCheck,
+  Star,
+  ArrowUpRight,
   ChevronRight
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -31,9 +31,7 @@ const EventCard = ({ event, onSaveToggle, variant = 'default' }) => {
       normalized = '/' + normalized;
     }
     if (normalized.startsWith('/uploads')) {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const backendUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
-      return `${backendUrl}${normalized}`;
+      return `${BACKEND_URL}${normalized}`;
     }
     return url;
   };
@@ -330,7 +328,7 @@ const EventCard = ({ event, onSaveToggle, variant = 'default' }) => {
         </div>
 
         <div className="pt-4 mt-4 border-t border-white/5 flex items-center justify-between text-[10px] font-mono font-medium">
-          <span className="flex items-center gap-1 text-text-secondary"><Calendar className="h-3.5 w-3.5 text-brand" /> {new Date(event.startDate).toLocaleDateString([], {month: 'short', day: 'numeric'})}</span>
+          <span className="flex items-center gap-1 text-text-secondary"><Calendar className="h-3.5 w-3.5 text-brand" /> {new Date(event.startDate).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
           <Link to={`/event/${event._id}`} className="text-[9px] font-bold text-brand uppercase tracking-wider flex items-center gap-0.5">
             Pass Details &rarr;
           </Link>
@@ -378,7 +376,7 @@ const EventCard = ({ event, onSaveToggle, variant = 'default' }) => {
               <span className="uppercase">{event.category} FESTIVAL</span>
               <span className="flex items-center gap-0.5 text-signal font-semibold"><Star className="h-3 w-3 fill-signal text-signal" /> {ratingVal}</span>
             </div>
-            
+
             <h3 className="font-display text-base font-black uppercase text-white leading-tight tracking-wide group-hover:text-brand transition-colors line-clamp-1">
               <Link to={`/event/${event._id}`}>{event.title}</Link>
             </h3>

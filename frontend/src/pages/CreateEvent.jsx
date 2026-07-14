@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
-  Image, 
-  IndianRupee, 
-  Loader2, 
-  ArrowLeft, 
-  Eye, 
+import {
+  Image,
+  IndianRupee,
+  Loader2,
+  ArrowLeft,
+  Eye,
   CheckCircle,
   FileText,
   MapPin,
@@ -15,13 +15,14 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { BACKEND_URL } from '../context/AuthContext';
 
 const CATEGORIES = ['Music', 'Tech', 'Art', 'Sports', 'Business', 'Food', 'Other'];
 
 const CreateEvent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const isEditMode = !!id;
   const [step, setStep] = useState(1);
 
@@ -58,7 +59,7 @@ const CreateEvent = () => {
         setLocation(ev.location);
         setPrice(ev.price);
         setTotalTickets(ev.totalTickets);
-        
+
         if (ev.startDate) setStartDate(new Date(ev.startDate).toISOString().slice(0, 16));
         if (ev.endDate) setEndDate(new Date(ev.endDate).toISOString().slice(0, 16));
 
@@ -71,9 +72,7 @@ const CreateEvent = () => {
               normalized = '/' + normalized;
             }
             if (normalized.startsWith('/uploads')) {
-              const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-              const backendUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
-              setBannerPreview(`${backendUrl}${normalized}`);
+              setBannerPreview(`${BACKEND_URL}${normalized}`);
             } else {
               setBannerPreview(ev.bannerUrl);
             }
@@ -155,7 +154,7 @@ const CreateEvent = () => {
 
     setError('');
     setSubmitting(true);
-    
+
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
@@ -165,7 +164,7 @@ const CreateEvent = () => {
     formData.append('endDate', endDate);
     formData.append('price', price);
     formData.append('totalTickets', totalTickets);
-    
+
     if (banner) {
       formData.append('banner', banner);
     }
@@ -225,8 +224,8 @@ const CreateEvent = () => {
       <section className="border-b border-white/5 bg-es-surface/60 backdrop-blur-md py-10 px-4 md:px-8 text-white rounded-b-[40px] shadow-2xl">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Link 
-              to="/organizer-dashboard" 
+            <Link
+              to="/organizer-dashboard"
               className="p-2.5 rounded-xl border border-white/5 bg-es-surface hover:bg-white/5 text-text-tertiary hover:text-white transition-colors cursor-pointer"
             >
               <ArrowLeft className="h-4.5 w-4.5" />
@@ -242,7 +241,7 @@ const CreateEvent = () => {
       </section>
 
       <main className="max-w-3xl mx-auto px-4 mt-10 space-y-8">
-      
+
         {/* Step Progress indicators */}
         <div className="flex justify-between items-center max-w-xl mx-auto relative px-4 text-xs font-bold uppercase tracking-wider">
           <div className="absolute inset-x-8 top-4 h-0.5 bg-es-surface-raised z-0" />
@@ -250,11 +249,10 @@ const CreateEvent = () => {
 
           {stepsList.map(s => (
             <div key={s.num} className="relative z-10 flex flex-col items-center gap-1.5 font-display">
-              <span className={`h-8.5 w-8.5 rounded-full flex items-center justify-center border transition-all duration-300 ${
-                step === s.num ? 'bg-brand border-brand text-white font-extrabold shadow-es-glow-brand' :
-                step > s.num ? 'bg-emerald-500 border-emerald-500 text-white' :
-                'bg-es-void border-white/5 text-text-tertiary'
-              }`}>
+              <span className={`h-8.5 w-8.5 rounded-full flex items-center justify-center border transition-all duration-300 ${step === s.num ? 'bg-brand border-brand text-white font-extrabold shadow-es-glow-brand' :
+                  step > s.num ? 'bg-emerald-500 border-emerald-500 text-white' :
+                    'bg-es-void border-white/5 text-text-tertiary'
+                }`}>
                 {step > s.num ? '✓' : s.num}
               </span>
               <span className={step === s.num ? 'text-brand font-extrabold' : 'text-text-tertiary font-semibold'}>{s.label}</span>
@@ -265,7 +263,7 @@ const CreateEvent = () => {
         {/* Validation Errors banner */}
         <AnimatePresence>
           {error && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
@@ -279,7 +277,7 @@ const CreateEvent = () => {
         {/* Form content steps */}
         <div className="bg-es-surface border border-white/[0.08] rounded-3xl p-6 sm:p-8 shadow-2xl">
           <AnimatePresence mode="wait">
-          
+
             {/* STEP 1: Basic Details */}
             {step === 1 && (
               <motion.div
