@@ -1,5 +1,5 @@
 services:
-  # 1. Backend API Service
+  # Backend API
   - type: web
     name: eventsphere-backend
     env: node
@@ -9,47 +9,52 @@ services:
     startCommand: npm start
     healthCheckPath: /
     envVars:
-      - key: PORT
-        value: 10000
       - key: NODE_ENV
         value: production
+
       - key: JWT_SECRET
         generateValue: true
+
       - key: JWT_EXPIRE
         value: 7d
+
       - key: MONGODB_URI
-        sync: false # Prompt user to input their MongoDB connection string in Render dashboard
+        sync: false
+
       - key: USE_MOCK_PAYMENTS
         value: "true"
+
       - key: USE_MOCK_CLOUDINARY
         value: "true"
+
       - key: SMTP_HOST
         value: smtp.gmail.com
+
       - key: SMTP_PORT
         value: "587"
+
       - key: SMTP_USER
-        sync: false # Prompt user for Gmail SMTP address
+        sync: false
+
       - key: SMTP_PASS
-        sync: false # Prompt user for Gmail SMTP app password
+        sync: false
+
       - key: SMTP_FROM
         value: noreply@eventsphere.com
 
-  # 2. Frontend React Web Client
-  - type: web
+  # Frontend React App
+  - type: static
     name: eventsphere-frontend
-    env: static
     plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
     publishDir: dist
+
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
+
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: eventsphere-backend
-          property: url
-        value: ${eventsphere-backend.url}/api
+        sync: false
