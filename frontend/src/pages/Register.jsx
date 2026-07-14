@@ -45,7 +45,7 @@ const Register = () => {
       }
     } catch (err) {
       console.error(err);
-      setError('Google registration authentication failed.');
+      setError(`Google registration authentication failed: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }

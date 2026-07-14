@@ -105,9 +105,10 @@ export const AuthProvider = ({ children }) => {
         return { success: true };
       }
     } catch (error) {
+      console.error('Google login axios error:', error);
       return {
         success: false,
-        message: error.response?.data?.message || 'Google authentication failed.',
+        message: error.response?.data?.message || `Google authentication failed: ${error.message}`,
       };
     } finally {
       setLoading(false);

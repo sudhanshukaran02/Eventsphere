@@ -58,7 +58,7 @@ const Login = () => {
       }
     } catch (err) {
       console.error(err);
-      setError('Google authentication failed.');
+      setError(`Google authentication failed: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
