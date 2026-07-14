@@ -46,7 +46,6 @@ services:
   - type: web
     name: eventsphere-frontend
     runtime: static
-    plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
